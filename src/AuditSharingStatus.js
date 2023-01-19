@@ -103,24 +103,25 @@ function auditSharingStatus() {
     } else {
       // 問題が検出されなかった場合も、実行確認のために完了通知を出す
       const mailCompleteSubject = `${MAIL_SUB_PREFIX} 検査完了（権限監査ツール）`;
-      const mailCompleteBody = `権限監査ツールの検査対象となっているGoogle Driveフォルダ内を検査し、問題はありませんでした。\n※このメールは自動送信されています\n\n権限監査ツールの設定は次のとおりとなっています：\n\n監査対象の親フォルダ：${DriveApp.getFolderById(
-        config.TARGET_PARENT_FOLDER_ID
-      ).getName()}\nメール通知先：${
-        config.NOTIFICATION_EMAIL_TO
-      }\n基本権限（このユーザ／グループへの共有は許可されています）：${allowedBasicUsersGroups.join(
-        ', '
-      )}\n個別権限（これらのファイル／フォルダには個別に追加の権限設定が許可されています）：${
-        allowedIndividualUsersGroups
-          ? `\n${Object.keys(allowedIndividualUsersGroups)
-              .map((key) => {
-                const file = DriveApp.getFileById(key);
-                return `名前：${file.getName()}\nURL：${file.getUrl()}\n追加権限:${allowedIndividualUsersGroups[
-                  key
-                ].join(', ')}`;
-              })
-              .join('\n==\n')}`
-          : '（なし）'
-      }`;
+      const mailCompleteBody =
+        `権限監査ツールの検査対象となっているGoogle Driveフォルダ内を検査し、問題はありませんでした。\n※このメールは自動送信されています\n\n権限監査ツールの設定は次のとおりとなっています：\n\n監査対象の親フォルダ：${DriveApp.getFolderById(
+          config.TARGET_PARENT_FOLDER_ID
+        ).getName()}\nメール通知先：${
+          config.NOTIFICATION_EMAIL_TO
+        }\n基本権限（このユーザ／グループへの共有は許可されています）：${allowedBasicUsersGroups.join(
+          ', '
+        )}\n個別権限（これらのファイル／フォルダには個別に追加の権限設定が許可されています）：${
+          allowedIndividualUsersGroups
+            ? `\n${Object.keys(allowedIndividualUsersGroups)
+                .map((key) => {
+                  const file = DriveApp.getFileById(key);
+                  return `名前：${file.getName()}\nURL：${file.getUrl()}\n追加権限:${allowedIndividualUsersGroups[
+                    key
+                  ].join(', ')}`;
+                })
+                .join('\n==\n')}`
+            : '（なし）'
+        }` + mailBodySuffix;
       console.info(`${mailCompleteSubject}\n${mailCompleteBody}`);
       MailApp.sendEmail(
         config.NOTIFICATION_EMAIL_TO,
