@@ -62,6 +62,8 @@ A 列にファイル／フォルダ ID を、B 列にアカウントを記載し
 
 定期的に本ツールを実行させたいのであれば、スプレッドシートのメニューから「`拡張機能`」＞「`Apps Script`」を開き、画面左のメニューで「`トリガー`」を選択します。「`トリガーを追加`」から、関数「`auditSharingStatus`」を任意の頻度で実行するよう、設定してください。
 
+<img width="700" alt="トリガー設定画面のスクリーンショット" src="https://user-images.githubusercontent.com/55706659/213766651-24eb0bec-91b9-4bbf-902c-ffcc78ea28f6.png">
+
 なお、本ツールは 1 日おきに実行するように設計されたものです。設定するトリガーの頻度や、監査対象となるファイル数によっては、スクリプトの実行時間等が[GAS の利用制限](https://developers.google.com/apps-script/guides/services/quotas)の上限を超過する可能性があることにはご留意ください。
 
 ## 利用条件等
