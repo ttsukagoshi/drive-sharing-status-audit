@@ -1,0 +1,35 @@
+{
+  "name": "drive-sharing-status-audit",
+  "version": "0.1.0",
+  "description": "指定した Google Drive フォルダ内で、意図しない共有がないかを監視するための、Google スプレッドシートと Google Apps Script で作った権限監査ツール",
+  "main": "src/AuditSharingStatus.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ttsukagoshi/drive-sharing-status-audit.git"
+  },
+  "keywords": [
+    "google-drive",
+    "google-sheets",
+    "google-apps-script"
+  ],
+  "author": "ttsukagoshi",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ttsukagoshi/drive-sharing-status-audit/issues"
+  },
+  "homepage": "https://github.com/ttsukagoshi/drive-sharing-status-audit#readme",
+  "devDependencies": {
+    "@google/clasp": "^2.4.2",
+    "@types/google-apps-script": "^1.0.56",
+    "@typescript-eslint/eslint-plugin": "^5.48.0",
+    "@typescript-eslint/parser": "^5.48.0",
+    "eslint": "^8.31.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.1",
+    "typescript": "^4.9.4"
+  }
+}
