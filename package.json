@@ -1,6 +1,6 @@
 {
   "name": "drive-sharing-status-audit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "指定した Google Drive フォルダ内で、意図しない共有がないかを監視するための、Google スプレッドシートと Google Apps Script で作った権限監査ツール",
   "main": "src/AuditSharingStatus.js",
   "scripts": {
