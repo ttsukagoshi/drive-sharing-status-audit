@@ -306,6 +306,7 @@ function checkFileFolderSharingStatus_(
   return alertFiles;
 }
 
+// ローカル開発でのESLint用の一言
 if (typeof module === 'object') {
   module.exports = {
     onOpen,
