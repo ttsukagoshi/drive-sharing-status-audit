@@ -266,13 +266,13 @@ function checkFileFolderSharingStatus_(
       // 想定したユーザ／グループ以外のアカウントが含まれている場合
       if (
         allowedIndividualUsersGroups &&
-        allowedIndividualUsersGroups[fileId] &&
+        allowedIndividualUsersGroups[folderId] &&
         (!allowedIndividualUsersGroups[folderId].includes(folderOwner) ||
           folderEditors.filter(
-            (editor) => !allowedIndividualUsersGroups[fileId].includes(editor)
+            (editor) => !allowedIndividualUsersGroups[folderId].includes(editor)
           ).length > 0 ||
           folderViewers.filter(
-            (viewer) => !allowedIndividualUsersGroups[fileId].includes(viewer)
+            (viewer) => !allowedIndividualUsersGroups[folderId].includes(viewer)
           ).length > 0)
       ) {
         // さらにその中で、ファイル／フォルダごとに個別に許可した一覧に該当項目があり、かつ
@@ -286,11 +286,11 @@ function checkFileFolderSharingStatus_(
         });
       } else {
         alertFiles.push({
-          name: file.getName(),
-          url: file.getUrl(),
-          owner: fileOwner,
-          editors: fileEditors,
-          viewers: fileViewers,
+          name: folder.getName(),
+          url: folder.getUrl(),
+          owner: folderOwner,
+          editors: folderEditors,
+          viewers: folderViewers,
         });
       }
     }
@@ -304,4 +304,12 @@ function checkFileFolderSharingStatus_(
     );
   }
   return alertFiles;
+}
+
+// ローカル開発でのESLint用の一言
+if (typeof module === 'object') {
+  module.exports = {
+    onOpen,
+    auditSharingStatus,
+  };
 }
