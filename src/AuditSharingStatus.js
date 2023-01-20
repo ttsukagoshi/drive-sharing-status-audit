@@ -91,7 +91,9 @@ function auditSharingStatus() {
                 file.owner
               }\n編集者：${file.editors.join(
                 ', '
-              )}\n閲覧者／閲覧者（コメント）：${file.viewers.join(', ')}`
+              )}\n閲覧者／閲覧者（コメント）：${file.viewers.join(
+                ', '
+              )}\n一般的なアクセス：${file.access}`
           )
           .join('\n\n')}` + mailBodySuffix;
       console.error(`${mailAlertSubject}\n${mailAlertBody}`);
@@ -150,7 +152,7 @@ function auditSharingStatus() {
  * @param {*} allowedIndividualUsersGroups ファイル／フォルダごとに個別に許可されているユーザとグループの一覧。
  * ファイル／フォルダIDをキー、値をユーザ一覧の配列としたオブジェクト
  * @param {any[]} alertFiles 既存の、想定外の権限が付与されているファイル／フォルダのメタ情報が含まれたオブジェクトの配列
- * @returns {any[]} 追加された想定外の権限が付与されているファイル／フォルダのメタ情報が含まれたオブジェクトの配列
+ * @returns {any[]} 更新されたalertFiles
  */
 function checkFileFolderSharingStatus_(
   targetFolderId,
@@ -165,144 +167,114 @@ function checkFileFolderSharingStatus_(
   ];
   while (targetFilesSubfolders[0].hasNext()) {
     const file = targetFilesSubfolders[0].next();
-
-    // ファイルの一般的な共有条件（PRIVATE=非公開、DOMAIN=組織内、ANYONE=一般公開）
-    // DriveApp.Accessの値のそれぞれの意味について、
-    // 詳細は https://developers.google.com/apps-script/reference/drive/access を参照のこと
-    const fileSharingAccess = file.getSharingAccess();
-
-    // その他、当該ファイルのIDや共有アカウントといったメタ情報
-    const fileId = file.getId();
-    const fileOwner = file.getOwner().getEmail();
-    const fileEditors = file.getEditors().map((editor) => editor.getEmail());
-    const fileViewers = file.getViewers().map((viewer) => viewer.getEmail());
-
-    if (fileSharingAccess !== DriveApp.Access.PRIVATE) {
-      // ファイルが「非公開」以外の状態であれば、その時点で想定外の権限が付与されていると見なす
-      alertFiles.push({
-        name: file.getName(),
-        url: file.getUrl(),
-        owner: fileOwner,
-        editors: fileEditors,
-        viewers: fileViewers,
-      });
-    } else if (
-      !allowedBasicUsersGroups.includes(fileOwner) ||
-      fileEditors.filter((editor) => !allowedBasicUsersGroups.includes(editor))
-        .length > 0 ||
-      fileViewers.filter((viewer) => !allowedBasicUsersGroups.includes(viewer))
-        .length > 0
-    ) {
-      // オーナー、編集者、閲覧者（コメント）、閲覧者いずれかに、
-      // 想定したユーザ／グループ以外のアカウントが含まれている場合
-      if (
-        allowedIndividualUsersGroups &&
-        allowedIndividualUsersGroups[fileId] &&
-        (!allowedIndividualUsersGroups[fileId].includes(fileOwner) ||
-          fileEditors.filter(
-            (editor) => !allowedIndividualUsersGroups[fileId].includes(editor)
-          ).length > 0 ||
-          fileViewers.filter(
-            (viewer) => !allowedIndividualUsersGroups[fileId].includes(viewer)
-          ).length > 0)
-      ) {
-        // さらにその中で、ファイル／フォルダごとに個別に許可した一覧に該当項目があり、かつ
-        // その個別に許可したユーザ／グループ以外のアカウントが含まれている場合
-        alertFiles.push({
-          name: file.getName(),
-          url: file.getUrl(),
-          owner: fileOwner,
-          editors: fileEditors,
-          viewers: fileViewers,
-        });
-      } else {
-        alertFiles.push({
-          name: file.getName(),
-          url: file.getUrl(),
-          owner: fileOwner,
-          editors: fileEditors,
-          viewers: fileViewers,
-        });
-      }
-    }
-  }
-  while (targetFilesSubfolders[1].hasNext()) {
-    const folder = targetFilesSubfolders[1].next();
-
-    // ファイルの一般的な共有条件（PRIVATE=非公開、DOMAIN=組織内、ANYONE=一般公開）
-    // DriveApp.Accessの値のそれぞれの意味について、
-    // 詳細は https://developers.google.com/apps-script/reference/drive/access を参照のこと
-    const folderSharingAccess = folder.getSharingAccess();
-
-    // その他、当該ファイルのIDや共有アカウントといったメタ情報
-    const folderId = folder.getId();
-    const folderOwner = folder.getOwner().getEmail();
-    const folderEditors = folder
-      .getEditors()
-      .map((editor) => editor.getEmail());
-    const folderViewers = folder
-      .getViewers()
-      .map((viewer) => viewer.getEmail());
-
-    if (folderSharingAccess !== DriveApp.Access.PRIVATE) {
-      // ファイルが「非公開」以外の状態であれば、その時点で想定外の権限が付与されていると見なす
-      alertFiles.push({
-        name: folder.getName(),
-        url: folder.getUrl(),
-        owner: folderOwner,
-        editors: folderEditors,
-        viewers: folderViewers,
-      });
-    } else if (
-      !allowedBasicUsersGroups.includes(folderOwner) ||
-      folderEditors.filter(
-        (editor) => !allowedBasicUsersGroups.includes(editor)
-      ).length > 0 ||
-      folderViewers.filter(
-        (viewer) => !allowedBasicUsersGroups.includes(viewer)
-      ).length > 0
-    ) {
-      // オーナー、編集者、閲覧者（コメント）、閲覧者いずれかに、
-      // 想定したユーザ／グループ以外のアカウントが含まれている場合
-      if (
-        allowedIndividualUsersGroups &&
-        allowedIndividualUsersGroups[folderId] &&
-        (!allowedIndividualUsersGroups[folderId].includes(folderOwner) ||
-          folderEditors.filter(
-            (editor) => !allowedIndividualUsersGroups[folderId].includes(editor)
-          ).length > 0 ||
-          folderViewers.filter(
-            (viewer) => !allowedIndividualUsersGroups[folderId].includes(viewer)
-          ).length > 0)
-      ) {
-        // さらにその中で、ファイル／フォルダごとに個別に許可した一覧に該当項目があり、かつ
-        // その個別に許可したユーザ／グループ以外のアカウントが含まれている場合
-        alertFiles.push({
-          name: folder.getName(),
-          url: folder.getUrl(),
-          owner: folderOwner,
-          editors: folderEditors,
-          viewers: folderViewers,
-        });
-      } else {
-        alertFiles.push({
-          name: folder.getName(),
-          url: folder.getUrl(),
-          owner: folderOwner,
-          editors: folderEditors,
-          viewers: folderViewers,
-        });
-      }
-    }
-
-    // 再帰的に当該フォルダ内ののファイル／サブフォルダも確認する。
-    alertFiles = checkFileFolderSharingStatus_(
-      folderId,
+    alertFiles = updateAlertFiles_(
+      file,
       allowedBasicUsersGroups,
       allowedIndividualUsersGroups,
       alertFiles
     );
   }
+  while (targetFilesSubfolders[1].hasNext()) {
+    const folder = targetFilesSubfolders[1].next();
+    alertFiles = updateAlertFiles_(
+      folder,
+      allowedBasicUsersGroups,
+      allowedIndividualUsersGroups,
+      alertFiles
+    );
+
+    // 再帰的に当該フォルダ内ののファイル／サブフォルダも確認する。
+    alertFiles = checkFileFolderSharingStatus_(
+      folder.getId(),
+      allowedBasicUsersGroups,
+      allowedIndividualUsersGroups,
+      alertFiles
+    );
+  }
+  return alertFiles;
+}
+
+/**
+ * 個別のGoogleドライブファイル／フォルダについて、その共有先アカウントや共有状況を確認する実質的な関数。
+ * 想定外の共有があった場合、受け取ったalertFiles配列に当該ファイル／フォルダのメタ情報を追加して返す。
+ * @param {GoogleAppsScript.Drive.File | GoogleAppsScript.Drive.Folder} driveObj 個別のGoogleドライブファイル／フォルダ
+ * @param {string[]} allowedBasicUsersGroups 許可されているユーザとグループの一覧
+ * @param {*} allowedIndividualUsersGroups ファイル／フォルダごとに個別に許可されているユーザとグループの一覧。
+ * ファイル／フォルダIDをキー、値をユーザ一覧の配列としたオブジェクト
+ * @param {any[]} alertFiles 既存の、想定外の権限が付与されているファイル／フォルダのメタ情報が含まれたオブジェクトの配列
+ * @returns {any[]} 更新されたalertFiles
+ */
+function updateAlertFiles_(
+  driveObj,
+  allowedBasicUsersGroups,
+  allowedIndividualUsersGroups,
+  alertFiles
+) {
+  // ファイルの一般的な共有条件（PRIVATE=非公開、DOMAIN=組織内、ANYONE=一般公開）
+  // DriveApp.Accessの値のそれぞれの意味について、
+  // 詳細は https://developers.google.com/apps-script/reference/drive/access を参照のこと
+  const fileSharingAccess = driveObj.getSharingAccess();
+
+  // その他、当該ファイルのIDや共有アカウントといったメタ情報
+  const fileId = driveObj.getId();
+  const fileName = driveObj.getName();
+  const fileOwner = driveObj.getOwner().getEmail();
+  const fileEditors = driveObj.getEditors().map((editor) => editor.getEmail());
+  const fileViewers = driveObj.getViewers().map((viewer) => viewer.getEmail());
+  console.info(`確認中：${fileName}`);
+
+  if (fileSharingAccess !== DriveApp.Access.PRIVATE) {
+    // ファイルが「非公開」以外の状態であれば、その時点で想定外の権限が付与されていると見なす
+    alertFiles.push({
+      name: fileName,
+      url: driveObj.getUrl(),
+      owner: fileOwner,
+      editors: fileEditors,
+      viewers: fileViewers,
+      access: fileSharingAccess,
+    });
+  } else if (
+    !allowedBasicUsersGroups.includes(fileOwner) ||
+    fileEditors.filter((editor) => !allowedBasicUsersGroups.includes(editor))
+      .length > 0 ||
+    fileViewers.filter((viewer) => !allowedBasicUsersGroups.includes(viewer))
+      .length > 0
+  ) {
+    // オーナー、編集者、閲覧者（コメント）、閲覧者いずれかに、
+    // 想定したユーザ／グループ以外のアカウントが含まれている場合
+    if (
+      allowedIndividualUsersGroups &&
+      allowedIndividualUsersGroups[fileId] &&
+      (!allowedIndividualUsersGroups[fileId].includes(fileOwner) ||
+        fileEditors.filter(
+          (editor) => !allowedIndividualUsersGroups[fileId].includes(editor)
+        ).length > 0 ||
+        fileViewers.filter(
+          (viewer) => !allowedIndividualUsersGroups[fileId].includes(viewer)
+        ).length > 0)
+    ) {
+      // さらにその中で、ファイル／フォルダごとに個別に許可した一覧に該当項目があり、かつ
+      // その個別に許可したユーザ／グループ以外のアカウントが含まれている場合
+      alertFiles.push({
+        name: fileName,
+        url: driveObj.getUrl(),
+        owner: fileOwner,
+        editors: fileEditors,
+        viewers: fileViewers,
+        access: fileSharingAccess,
+      });
+    } else {
+      alertFiles.push({
+        name: fileName,
+        url: driveObj.getUrl(),
+        owner: fileOwner,
+        editors: fileEditors,
+        viewers: fileViewers,
+        access: fileSharingAccess,
+      });
+    }
+  }
+  console.info(`確認完了：${fileName}`);
   return alertFiles;
 }
 
