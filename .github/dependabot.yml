@@ -25,3 +25,9 @@ updates:
       prefix: 'npm'
       include: 'scope'
     target-branch: 'main'
+    versioning-strategy: 'increase'
+    open-pull-requests-limit: 10
+    groups:
+      typescript-eslint:
+        patterns:
+          - '@typescript-eslint/*'
