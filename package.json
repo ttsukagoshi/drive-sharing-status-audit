@@ -23,7 +23,7 @@
   "homepage": "https://github.com/ttsukagoshi/drive-sharing-status-audit#readme",
   "devDependencies": {
     "@google/clasp": "^2.4.2",
-    "@types/google-apps-script": "^1.0.76",
+    "@types/google-apps-script": "^1.0.78",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
     "@typescript-eslint/parser": "^6.9.1",
     "eslint": "^8.53.0",
